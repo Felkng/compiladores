@@ -156,8 +156,8 @@ KW_FOR for
 ID i
 KW_IN in
 LPAREN (
-LIT_FLOAT 0.
-DOT .
+LIT_INT_DEC 0
+DOTDOT ..
 ID n
 KW_AS as
 ID usize

@@ -224,7 +224,6 @@ TOKEN : {
         <DEC_LIT> "." <DEC_LIT> <FLOAT_EXP> (<SUFFIX>)?
       | <DEC_LIT> "." <DEC_LIT> (<SUFFIX>)?
       | <DEC_LIT> <FLOAT_EXP> (<SUFFIX>)?
-      | <DEC_LIT> "."
     >
   |
     /* Inteiro binário: 0b[_]*[01][01_]* */

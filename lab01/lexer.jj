@@ -1,0 +1,436 @@
+/* ============================================================
+ * Analisador Léxico para Rust — JavaCC
+ * Disciplina: Compiladores
+ * ============================================================ */
+
+options {
+    STATIC = false;
+    UNICODE_INPUT = false;
+}
+
+PARSER_BEGIN(RustLexer)
+
+import java.io.*;
+import java.lang.reflect.*;
+
+public class RustLexer {
+
+    /* Mapa: kind → nome da classe em MAIÚSCULO */
+    private static String[] classNames;
+
+    private static void buildClassNames() {
+        classNames = new String[tokenImage.length];
+
+        /* Usa reflection para obter o nome do campo constante
+           a partir do valor inteiro do kind */
+        try {
+            Field[] fields = RustLexerConstants.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (f.getType() == int.class &&
+                    Modifier.isStatic(f.getModifiers()) &&
+                    Modifier.isFinal(f.getModifiers())) {
+                    int val = f.getInt(null);
+                    if (val >= 0 && val < classNames.length) {
+                        classNames[val] = f.getName();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            /* fallback: se reflection falhar, usa tokenImage */
+            for (int i = 0; i < tokenImage.length; i++) {
+                String img = tokenImage[i];
+                if (img.startsWith("<") && img.endsWith(">")) {
+                    classNames[i] = img.substring(1, img.length() - 1);
+                } else {
+                    classNames[i] = img.replace("\"", "");
+                }
+            }
+        }
+
+        /* Preenche posicoes que ficaram null (ex: EOF) */
+        for (int i = 0; i < classNames.length; i++) {
+            if (classNames[i] == null) {
+                String img = tokenImage[i];
+                if (img.startsWith("<") && img.endsWith(">")) {
+                    classNames[i] = img.substring(1, img.length() - 1);
+                } else {
+                    classNames[i] = img.replace("\"", "");
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws ParseException, TokenMgrError {
+        Reader reader;
+        if (args.length > 0) {
+            try {
+                reader = new FileReader(args[0]);
+            } catch (FileNotFoundException e) {
+                System.err.println("Arquivo nao encontrado: " + args[0]);
+                return;
+            }
+        } else {
+            reader = new InputStreamReader(System.in);
+        }
+
+        RustLexer lexer = new RustLexer(reader);
+        buildClassNames();
+
+        Token t;
+        while (true) {
+            try {
+                t = lexer.getNextToken();
+            } catch (TokenMgrError e) {
+                System.err.println("ERRO_LEXICO " + e.getMessage());
+                return;
+            }
+            if (t.kind == EOF) break;
+
+            /* Imprime comentários especiais que precedem este token */
+            Token sp = t.specialToken;
+            if (sp != null) {
+                /* Percorre a lista encadeada até o início */
+                while (sp.specialToken != null) sp = sp.specialToken;
+                while (sp != null) {
+                    printSpecial(sp);
+                    sp = sp.next;
+                }
+            }
+
+            System.out.println(classNames[t.kind] + " " + t.image);
+        }
+    }
+
+    private static void printSpecial(Token sp) {
+        String img = sp.image;
+        if (img.startsWith("//")) {
+            System.out.println("COMMENT_LINE " + img);
+        } else if (img.startsWith("/*")) {
+            System.out.println("COMMENT_BLOCK " + img);
+        }
+    }
+}
+
+PARSER_END(RustLexer)
+
+/* ----------------------------------------------------------
+ * 1. WHITESPACE — ignorado
+ * ---------------------------------------------------------- */
+SKIP : {
+    " " | "\t" | "\n" | "\r" | "\r\n"
+}
+
+/* ----------------------------------------------------------
+ * 2. COMENTÁRIOS — special tokens (impressos pelo main)
+ * ---------------------------------------------------------- */
+SPECIAL_TOKEN : {
+    < SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")? >
+}
+
+/* Comentário de bloco: não suporta aninhamento nesta versão */
+MORE : {
+    "/*" : IN_BLOCK_COMMENT
+}
+<IN_BLOCK_COMMENT> SPECIAL_TOKEN : {
+    <BLOCK_COMMENT: "*/" > : DEFAULT
+}
+<IN_BLOCK_COMMENT> MORE : {
+    < ~[] >
+}
+
+/* ----------------------------------------------------------
+ * 3. PALAVRAS-CHAVE (strict keywords)
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < KW_AS       : "as" >
+  | < KW_ASYNC    : "async" >
+  | < KW_AWAIT    : "await" >
+  | < KW_BREAK    : "break" >
+  | < KW_CONST    : "const" >
+  | < KW_CONTINUE : "continue" >
+  | < KW_CRATE    : "crate" >
+  | < KW_DYN      : "dyn" >
+  | < KW_ELSE     : "else" >
+  | < KW_ENUM     : "enum" >
+  | < KW_EXTERN   : "extern" >
+  | < KW_FALSE    : "false" >
+  | < KW_FN       : "fn" >
+  | < KW_FOR      : "for" >
+  | < KW_IF       : "if" >
+  | < KW_IMPL     : "impl" >
+  | < KW_IN       : "in" >
+  | < KW_LET      : "let" >
+  | < KW_LOOP     : "loop" >
+  | < KW_MATCH    : "match" >
+  | < KW_MOD      : "mod" >
+  | < KW_MOVE     : "move" >
+  | < KW_MUT      : "mut" >
+  | < KW_PUB      : "pub" >
+  | < KW_REF      : "ref" >
+  | < KW_RETURN   : "return" >
+  | < KW_SELF_LOWER : "self" >
+  | < KW_SELF_UPPER : "Self" >
+  | < KW_STATIC   : "static" >
+  | < KW_STRUCT   : "struct" >
+  | < KW_SUPER    : "super" >
+  | < KW_TRAIT    : "trait" >
+  | < KW_TRUE     : "true" >
+  | < KW_TYPE     : "type" >
+  | < KW_UNSAFE   : "unsafe" >
+  | < KW_USE      : "use" >
+  | < KW_WHERE    : "where" >
+  | < KW_WHILE    : "while" >
+}
+
+/* ----------------------------------------------------------
+ * 4. PALAVRAS-CHAVE RESERVADAS
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < KW_ABSTRACT  : "abstract" >
+  | < KW_BECOME    : "become" >
+  | < KW_BOX       : "box" >
+  | < KW_DO        : "do" >
+  | < KW_FINAL     : "final" >
+  | < KW_GEN       : "gen" >
+  | < KW_MACRO     : "macro" >
+  | < KW_OVERRIDE  : "override" >
+  | < KW_PRIV      : "priv" >
+  | < KW_TRY       : "try" >
+  | < KW_TYPEOF    : "typeof" >
+  | < KW_UNSIZED   : "unsized" >
+  | < KW_VIRTUAL   : "virtual" >
+  | < KW_YIELD     : "yield" >
+}
+
+/* ----------------------------------------------------------
+ * 5. PALAVRAS-CHAVE FRACAS (weak keywords)
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < KW_UNION       : "union" >
+  | < KW_MACRO_RULES : "macro_rules" >
+  | < KW_SAFE        : "safe" >
+  | < KW_RAW         : "raw" >
+}
+
+/* ----------------------------------------------------------
+ * 6. LITERAIS NUMÉRICOS
+ *    Ordem: float antes de inteiro (para capturar "1.0" como float)
+ *    e hex/oct/bin antes de decimal (para capturar "0x", "0o", "0b")
+ * ---------------------------------------------------------- */
+
+TOKEN : {
+    /* Float: DEC.DEC EXP SUFFIX? | DEC.DEC SUFFIX? | DEC EXP SUFFIX? */
+    < LIT_FLOAT :
+        <DEC_LIT> "." <DEC_LIT> <FLOAT_EXP> (<SUFFIX>)?
+      | <DEC_LIT> "." <DEC_LIT> (<SUFFIX>)?
+      | <DEC_LIT> <FLOAT_EXP> (<SUFFIX>)?
+      | <DEC_LIT> "."
+    >
+  |
+    /* Inteiro binário: 0b[_]*[01][01_]* */
+    < LIT_INT_BIN :
+        "0b" ("_")* ["0"-"1"] (["0"-"1","_"])* (<SUFFIX>)?
+    >
+  |
+    /* Inteiro octal: 0o[_]*[0-7][0-7_]* */
+    < LIT_INT_OCT :
+        "0o" ("_")* ["0"-"7"] (["0"-"7","_"])* (<SUFFIX>)?
+    >
+  |
+    /* Inteiro hexadecimal: 0x[_]*[0-9a-fA-F][0-9a-fA-F_]* */
+    < LIT_INT_HEX :
+        "0x" ("_")* ["0"-"9","a"-"f","A"-"F"] (["0"-"9","a"-"f","A"-"F","_"])* (<SUFFIX>)?
+    >
+  |
+    /* Inteiro decimal: [0-9][0-9_]* */
+    < LIT_INT_DEC :
+        <DEC_LIT> (<SUFFIX>)?
+    >
+  |
+    /* Fragmentos auxiliares (não geram tokens independentes) */
+    < #DEC_LIT     : ["0"-"9"] (["0"-"9","_"])* >
+  | < #FLOAT_EXP   : ["e","E"] (["+","-"])? ("_")* ["0"-"9"] (["0"-"9","_"])* >
+  | < #SUFFIX      : ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+/* ----------------------------------------------------------
+ * 7. LITERAIS DE CARACTERE E STRING
+ * ---------------------------------------------------------- */
+TOKEN : {
+    /* Literal de caractere: 'x', '\n', '\x41' */
+    < LIT_CHAR :
+        "'"
+        (
+            ~["'", "\\", "\n", "\r", "\t"]
+          | <CHAR_ESCAPE>
+        )
+        "'"
+    >
+  |
+    /* Literal de string: "..." com escapes */
+    < LIT_STRING :
+        "\""
+        (
+            ~["\"", "\\", "\r"]
+          | <CHAR_ESCAPE>
+          | "\\" "\n"
+        )*
+        "\""
+    >
+  |
+    /* Fragmento: sequências de escape */
+    < #CHAR_ESCAPE :
+        "\\\'"
+      | "\\\""
+      | "\\\\"
+      | "\\n"
+      | "\\r"
+      | "\\t"
+      | "\\0"
+      | "\\x" ["0"-"7"] ["0"-"9","a"-"f","A"-"F"]
+      | "\\u{" (["0"-"9","a"-"f","A"-"F"] ("_")*)+ "}"
+    >
+}
+
+/* ----------------------------------------------------------
+ * 8. LITERAIS DE BYTE E BYTE STRING
+ * ---------------------------------------------------------- */
+TOKEN : {
+    /* Literal de byte: b'x' */
+    < LIT_BYTE :
+        "b'"
+        (
+            ~["'", "\\", "\n", "\r", "\t"]
+          | <BYTE_ESCAPE>
+        )
+        "b'"
+    >
+  |
+    /* Literal de byte string: b"..." */
+    < LIT_BYTE_STRING :
+        "b\""
+        (
+            ~["\"", "\\", "\r"]
+          | <BYTE_ESCAPE>
+          | "\\" "\n"
+        )*
+        "\""
+    >
+  |
+    < #BYTE_ESCAPE :
+        "\\\'"
+      | "\\\""
+      | "\\\\"
+      | "\\n"
+      | "\\r"
+      | "\\t"
+      | "\\0"
+      | "\\x" ["0"-"9","a"-"f","A"-"F"] ["0"-"9","a"-"f","A"-"F"]
+    >
+}
+
+/* ----------------------------------------------------------
+ * 9. RAW STRINGS: r"..." e r#"..."#
+ *    Simplificado: suporta r"...", r#"..."#, r##"..."##
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < LIT_RAW_STRING :
+        "r\""  (~["\""])* "\""
+      | "r#\"" (~["\""] | "\"" ~["#"])* "\"#"
+      | "r##\"" (~["\""] | "\"" ~["#"] | "\"#" ~["#"])* "\"##"
+    >
+  |
+    < LIT_RAW_BYTE_STRING :
+        "br\""  (~["\""])* "\""
+      | "br#\"" (~["\""] | "\"" ~["#"])* "\"#"
+      | "br##\"" (~["\""] | "\"" ~["#"] | "\"#" ~["#"])* "\"##"
+    >
+}
+
+/* ----------------------------------------------------------
+ * 10. LIFETIME / LABEL:  'ident
+ *     Deve vir antes de ID para capturar 'a etc.
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < LIFETIME :
+        "'" ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])*
+    >
+}
+
+/* ----------------------------------------------------------
+ * 11. IDENTIFICADORES
+ *     Deve vir DEPOIS das keywords.
+ *     Inclui raw identifiers: r#ident
+ * ---------------------------------------------------------- */
+TOKEN : {
+    < ID :
+        ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])*
+    >
+  |
+    < RAW_ID :
+        "r#" ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])*
+    >
+}
+
+/* ----------------------------------------------------------
+ * 12. PONTUAÇÃO — multi-char primeiro, single-char depois
+ * ---------------------------------------------------------- */
+TOKEN : {
+    /* 3 caracteres */
+    < DOTDOTDOT  : "..." >
+  | < DOTDOTEQ   : "..=" >
+  | < SHLEQ      : "<<=" >
+  | < SHREQ      : ">>=" >
+
+    /* 2 caracteres */
+  | < BANGEQ     : "!=" >
+  | < PERCENTEQ  : "%=" >
+  | < AMPAMP     : "&&" >
+  | < AMPEQ      : "&=" >
+  | < STAREQ     : "*=" >
+  | < PLUSEQ     : "+=" >
+  | < MINUSEQ    : "-=" >
+  | < ARROW      : "->" >
+  | < DOTDOT     : ".." >
+  | < SLASHEQ    : "/=" >
+  | < COLONCOLON : "::" >
+  | < SHL        : "<<" >
+  | < LE         : "<=" >
+  | < EQEQ       : "==" >
+  | < FATARROW   : "=>" >
+  | < GE         : ">=" >
+  | < SHR        : ">>" >
+  | < CARETEQ    : "^=" >
+  | < PIPEEQ     : "|=" >
+  | < PIPEPIPE   : "||" >
+
+    /* 1 caractere */
+  | < BANG       : "!" >
+  | < HASH       : "#" >
+  | < DOLLAR     : "$" >
+  | < PERCENT    : "%" >
+  | < AMP        : "&" >
+  | < LPAREN     : "(" >
+  | < RPAREN     : ")" >
+  | < STAR       : "*" >
+  | < PLUS       : "+" >
+  | < COMMA      : "," >
+  | < MINUS      : "-" >
+  | < DOT        : "." >
+  | < SLASH      : "/" >
+  | < COLON      : ":" >
+  | < SEMI       : ";" >
+  | < LT         : "<" >
+  | < EQ         : "=" >
+  | < GT         : ">" >
+  | < QUESTION   : "?" >
+  | < AT         : "@" >
+  | < LBRACKET   : "[" >
+  | < BACKSLASH  : "\\" >
+  | < RBRACKET   : "]" >
+  | < CARET      : "^" >
+  | < LBRACE     : "{" >
+  | < PIPE       : "|" >
+  | < RBRACE     : "}" >
+  | < TILDE      : "~" >
+}

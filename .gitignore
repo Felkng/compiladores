@@ -1,2 +1,14 @@
 *.class
 classroom/
+.gemini/
+lab02/entrada_lexer.txt
+lab02/parserLR/bin/parserLR
+out.txt
+lab01/ParseException.java
+lab01/SimpleCharStream.java
+lab01/Token.java
+lab01/TokenMgrError.java
+lab01/RustLexerConstants.java
+lab01/RustLexerTokenManager.java
+lab02/gramatica_web_clean.txt
+lab02/gramatica_web.txt

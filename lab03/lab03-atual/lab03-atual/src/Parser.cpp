@@ -53,11 +53,11 @@ Arvore_parse Parser::executa_parse(istream &input) {
       linhas_entrada.push_back(x);
     }
   }
-  cerr << "executa_parse(" << endl;
-  for (int i = 0; i < linhas_entrada.size(); ++i) {
-    cerr << linhas_entrada[i] << endl;
-  }
-  cerr << ")FIM_executa_parse" << endl;
+  // cerr << "executa_parse(" << endl;
+  // for (int i = 0; i < linhas_entrada.size(); ++i) {
+  //   cerr << linhas_entrada[i] << endl;
+  // }
+  // cerr << ")FIM_executa_parse" << endl;
   int estado_atual = 0;
   string tipo_terminal_lookahead;
   string texto_terminal;
@@ -65,16 +65,16 @@ Arvore_parse Parser::executa_parse(istream &input) {
   le_terminal(linhas_entrada[pos_entrada++], tipo_terminal_lookahead, texto_terminal);
   bool terminou = false;
   do {
-    cerr << "Estado:" << estado_atual << " Lookahead:" <<  tipo_terminal_lookahead << endl;
+    // cerr << "Estado:" << estado_atual << " Lookahead:" <<  tipo_terminal_lookahead << endl;
     Transicao t = tabela.Tab[estado_atual][tipo_terminal_lookahead];
-    cerr << "Transicao:"<<t.impressao() << endl;
+    // cerr << "Transicao:"<<t.impressao() << endl;
     if (t.tipo == 5) {
-      cerr << " REGRA LR1 insuficiente. Utilizando regra LR2" << endl;
+      // cerr << " REGRA LR1 insuficiente. Utilizando regra LR2" << endl;
       string lookahead_2;
       espia_proximo_tipo_terminal(linhas_entrada[pos_entrada], lookahead_2);
       Transicao regra_LR2 = t.mapa_LR2[lookahead_2];
       t = regra_LR2;
-      cerr << "Nova LR2 Transicao:"<<t.impressao() << endl;
+      // cerr << "Nova LR2 Transicao:"<<t.impressao() << endl;
     }
     switch(t.tipo) {
     case 0: { return Arvore_parse(NULL); break; } //erro
@@ -129,10 +129,10 @@ Arvore_parse Parser::executa_parse(istream &input) {
 	break;
       }
     case 4: {
-      cerr << "   QUASE FIM PARSE" << endl;
+      // cerr << "   QUASE FIM PARSE" << endl;
       No_arv_parse * retorno = pilha.top().first;
-      debug_desempilha(pilha);
-      cerr << "   FIM PARSE" << endl;
+      // debug_desempilha(pilha);
+      // cerr << "   FIM PARSE" << endl;
       return Arvore_parse(retorno);
       break;
     }
@@ -146,7 +146,7 @@ Arvore_parse Parser::executa_parse(istream &input) {
   cerr << "   PARSE Terminou por fim de arquivo. Faltou o $ no final da entrada?" << endl;
   cerr << "   ------------------------------------------------------------------" << endl;
   No_arv_parse * retorno = pilha.top().first;
-  debug_desempilha(pilha);
+  // debug_desempilha(pilha);
   return Arvore_parse(retorno);
 }
 

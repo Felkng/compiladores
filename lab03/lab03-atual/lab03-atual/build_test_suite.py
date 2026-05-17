@@ -88,7 +88,7 @@ for c_file in c_files:
         c_code = f.read()
         
     rust_code = translate_c_to_rust(c_code)
-    ling_path = f'ins/{basename}.ling'
+    ling_path = f'ins/{basename}.rs'
     with open(ling_path, 'w') as f:
         f.write(rust_code)
         

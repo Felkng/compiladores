@@ -15,7 +15,8 @@ echo -e "\e[1;32m-> Compilando o interpretador...\e[0m"
 make
 
 # 2. Regenera os testes finais
-echo -e "\e[1;32m-> 1/3: Rodando a suíte de testes (gerando X.ling, X.tokens, X.params, X.saida, X.err)...\e[0m"
+echo -e "\e[1;32m-> 1/3: Rodando a suíte de testes (gerando X.rs, X.tokens, X.params, X.saida, X.err)...\e[0m"
+rm -f ins/*.ling
 python3 build_test_suite.py
 
 # 2. Limpa os binários compilados
@@ -28,8 +29,8 @@ cd ..
 # Remove zip antigo se existir
 rm -f lab03-entrega.zip
 
-# Compacta desconsiderando arquivos indesejados
-zip -r lab03-entrega.zip lab03-atual -x "lab03-atual/.git/*" "lab03-atual/.DS_Store" "lab03-atual/__MACOSX/*"
+# Compacta desconsiderando arquivos indesejados e scripts auxiliares
+zip -r lab03-entrega.zip lab03-atual -x "lab03-atual/.git/*" "lab03-atual/.DS_Store" "lab03-atual/__MACOSX/*" "lab03-atual/build_test_suite.py" "lab03-atual/package_submission.sh"
 
 echo -e "\e[1;34m=== EMPACOTAMENTO CONCLUÍDO COM SUCESSO! ===\e[0m"
 echo -e "\e[32mArquivo ZIP gerado pronto para submissão:\e[0m"

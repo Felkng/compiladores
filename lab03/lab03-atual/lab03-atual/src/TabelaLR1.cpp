@@ -85,7 +85,7 @@ Tabela_LR1::Tabela_LR1(ifstream &arq_tabela_lr1) {
     if (mat[lin].size() >= 2) {
       int est = meu_stoi(mat[lin][0]);//Ex. ("0", "NUM", "s2")
       string simbolo = mat[lin][1]; // simbolo = "NUM"
-      cerr << est << " : " << simbolo << " -> " << Transicao(mat[lin][2]).impressao() << endl;
+      // cerr << est << " : " << simbolo << " -> " << Transicao(mat[lin][2]).impressao() << endl;
       Tab[est][simbolo] = Transicao(mat[lin][2]); // Transicao("s2")
     }
   }

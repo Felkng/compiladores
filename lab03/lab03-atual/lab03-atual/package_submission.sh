@@ -10,7 +10,11 @@ cd "$(dirname "$0")"
 
 echo -e "\e[1;34m=== PREPARANDO SUBMISSÃO DO LAB 03 ===\e[0m"
 
-# 1. Regenera os testes finais
+# 1. Compila o compilador para poder gerar os testes
+echo -e "\e[1;32m-> Compilando o interpretador...\e[0m"
+make
+
+# 2. Regenera os testes finais
 echo -e "\e[1;32m-> 1/3: Rodando a suíte de testes (gerando X.ling, X.tokens, X.params, X.saida, X.err)...\e[0m"
 python3 build_test_suite.py
 

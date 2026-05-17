@@ -12,3 +12,7 @@ lab01/RustLexerConstants.java
 lab01/RustLexerTokenManager.java
 lab02/gramatica_web_clean.txt
 lab02/gramatica_web.txt
+__MACOSX
+*.zip
+entrada_lexer.txt
+*.o

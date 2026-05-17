@@ -1,0 +1,17 @@
+KW_FN fn
+ID dobro
+LPAREN (
+ID n
+COLON :
+ID i32
+RPAREN )
+ARROW ->
+ID i32
+LBRACE {
+KW_RETURN return
+ID n
+STAR *
+LIT_INT_DEC 2
+SEMI ;
+RBRACE }
+$ $

@@ -1,0 +1,12 @@
+KW_FN fn
+ID verdadeiro
+LPAREN (
+RPAREN )
+ARROW ->
+ID bool
+LBRACE {
+KW_RETURN return
+ID true
+SEMI ;
+RBRACE }
+$ $

@@ -16,3 +16,10 @@ __MACOSX
 *.zip
 entrada_lexer.txt
 *.o
+.DS_Store
+*~
+build/
+compilador
+lab04/test.txt
+lab04/ins/*.err
+lab04/ins/*.saida

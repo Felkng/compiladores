@@ -13,18 +13,16 @@ using namespace std;
 #include "Arvore.hpp"
 #include "Parser.hpp"
 #include "Funcao.hpp"
-#include "Analisador.hpp"
 #include "FrameFuncao.hpp"
 
 
 int main(int argc, char * argv[]) {
   if (argc < 3) {
-    cerr << "Uso: compilador <gramatica> <tabela_lr1> [parametros.params]" << endl;
+    cerr << "Uso: compilador <gramatica> <tabela_lr1>" << endl;
     return 1;
   }
   string nome_gramatica = argv[1];
   string nome_tab_lr1 = argv[2];
-  string nome_params = (argc > 3) ? argv[3] : "";
 
   ifstream arq_gramatica(nome_gramatica);
   ifstream arq_tabela_lr1(nome_tab_lr1);
@@ -45,31 +43,6 @@ int main(int argc, char * argv[]) {
     cerr << "Erro: Nao foi possivel extrair a funcao da arvore!" << endl;
     return 1;
   }
-  cerr << "Funcao extraida. Lendo parametros..." << endl;
-  vector<ValorLiteral> parametros_passados;
-  if (!nome_params.empty()) {
-    ifstream arq_params(nome_params);
-    string linha;
-    while (getline(arq_params, linha)) {
-      if (linha.empty()) continue;
-      stringstream ss(linha);
-      string tipo, val;
-      ss >> tipo >> val;
-      ValorLiteral vl;
-      if (tipo == "INT" || tipo == "i32") {
-        vl.tipo = new Tipo(Tipo::INT);
-        vl.valor_int = stoi(val);
-      } else if (tipo == "FLOAT" || tipo == "f32") {
-        vl.tipo = new Tipo(Tipo::FLOAT);
-        vl.valor_float = stof(val);
-      } else if (tipo == "BOOL" || tipo == "bool") {
-        vl.tipo = new Tipo(Tipo::BOOL);
-        vl.valor_bool = (val == "true" || val == "1");
-      }
-      parametros_passados.push_back(vl);
-    }
-  }
-  cerr << "Parametros lidos. Calculando retorno..." << endl;
 
   FrameFuncao* ff = FrameFuncao::gera_frame_de_funcao(func);
   if (ff) {
@@ -81,7 +54,5 @@ int main(int argc, char * argv[]) {
     ff->print_detalhes(func);
   }
 
-  Analisador ana;
-  ana.calcula_retorno(func, parametros_passados);
   return 0;
 }

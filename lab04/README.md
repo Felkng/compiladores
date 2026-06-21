@@ -20,5 +20,5 @@ Para executar o compilador com um dos casos de teste disponíveis no diretório 
 
 ### Exemplo de Execução
 ```bash
-./compilador gramatica-9/gramatica-9.site gramatica-9/tabela_lr1.conf ins/0-retorna_soma_int.params < ins/0-retorna_soma_int.tokens
+./compilador gramatica-9/gramatica-9.site gramatica-9/tabela_lr1.conf ins/caso01.params < ins/caso01.tokens
 ```

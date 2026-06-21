@@ -56,6 +56,10 @@ def translate_c_to_rust(c_code):
                 rust_lines.append(f"    let mut {vname}: {vtype};")
             continue
             
+        # Replace True/False with true/false
+        line = re.sub(r'\bTrue\b', 'true', line)
+        line = re.sub(r'\bFalse\b', 'false', line)
+        
         # Just copy other lines as they are largely compatible (if, while, return, assignment)
         rust_lines.append(line)
         
@@ -79,10 +83,10 @@ def infer_params(rust_code):
                     params.append("BOOL true")
     return params
 
-c_files = glob.glob('exemplos/*.c')
+c_files = glob.glob('casos_de_teste/*.txt')
 
 for c_file in c_files:
-    basename = os.path.basename(c_file).replace('.c', '')
+    basename = os.path.basename(c_file).replace('.txt', '')
     
     with open(c_file, 'r') as f:
         c_code = f.read()
@@ -98,7 +102,7 @@ for c_file in c_files:
     
     tokens = res.stdout.strip()
     # Map KW_TRUE and KW_FALSE to ID to match the lab02 grammar
-    tokens = tokens.replace("KW_TRUE", "ID").replace("KW_FALSE", "ID")
+    tokens = tokens.replace("KW_TRUE", "ID").replace("KW_FALSE", "ID").replace("KW_LOOP", "ID")
     
     # Filter out COMMENT_LINE and COMMENT_BLOCK tokens
     token_lines = [t for t in tokens.split('\n') if t.strip() and not t.startswith("COMMENT_LINE") and not t.startswith("COMMENT_BLOCK")]

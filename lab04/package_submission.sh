@@ -29,7 +29,7 @@ cd ..
 rm -f compil-lab4-felipe-rodrigues-de-sousa-ferreira.zip
 
 # Compacta desconsiderando arquivos indesejados
-zip -r compil-lab4-felipe-rodrigues-de-sousa-ferreira.zip lab04 -x "lab04/.git/*" "lab04/.DS_Store" "lab04/__MACOSX/*" "*.py" "lab04/package_submission.sh" "lab04/test.txt" "lab04/lab04.pdf" "lab04/casos_de_teste/*" "lab04/ins/*"
+zip -r compil-lab4-felipe-rodrigues-de-sousa-ferreira.zip lab04 -x "lab04/.git/*" "lab04/.DS_Store" "lab04/__MACOSX/*" "*.py" "lab04/package_submission.sh" "lab04/test.txt" "lab04/ins/*.err" "lab04/ins/*.saida"
 
 echo -e "\e[1;34m=== EMPACOTAMENTO CONCLUÍDO COM SUCESSO! ===\e[0m"
 echo -e "\e[32mArquivo ZIP gerado pronto para submissão:\e[0m"

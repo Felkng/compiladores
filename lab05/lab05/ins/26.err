@@ -1,0 +1,22 @@
+LENDO: KW_FN fn
+LENDO: ID power
+LENDO: LPAREN (
+LENDO: ID base
+LENDO: COLON :
+LENDO: ID i32
+LENDO: COMMA ,
+LENDO: ID exp
+LENDO: COLON :
+LENDO: ID i32
+LENDO: RPAREN )
+LENDO: ARROW ->
+LENDO: ID i32
+LENDO: LBRACE {
+LENDO: KW_IF if
+LENDO: LPAREN (
+LENDO: ID exp
+LENDO: EQEQ ==
+LENDO: LIT_INT_DEC 0
+LENDO: RPAREN )
+LENDO: KW_RETURN return
+Erro: Nao foi possivel extrair a funcao da arvore!
